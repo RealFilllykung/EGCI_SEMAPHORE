@@ -63,7 +63,6 @@ static void del_semvalue(int s)
     
     if(semctl(s,0,IPC_RMID,sem_union) == -1)
     {
-        fprintf(stderr, "Failed to delete semaphore\n");
     }
 }
 
@@ -76,8 +75,7 @@ static int semaphore_p(int s)
     sem_b.sem_flg = SEM_UNDO;
     if(semop(s,&sem_b,1) == -1)
     {
-        fprintf(stderr,"semaphore_p failed\n");
-        return(0);
+        return(1);
     }
     return (1);
 }
@@ -91,26 +89,25 @@ static int semaphore_v(int s)
     sem_b.sem_flg = SEM_UNDO;
     if(semop(s,&sem_b,1) == -1)
     {
-        fprintf(stderr,"semaphore_v failed\n");
-        return (0);
+        return (1);
     }
     return (1);
 }
 
 void f1(pid_t pid)
 {
-    if (!semaphore_p(s1)) exit(EXIT_FAILURE);
+    semaphore_p(s1);
     printf("Enter f1\n");
     sleep(1);
     if (pid) f2(pid);
-    if(!semaphore_v(s1)) exit(EXIT_FAILURE);
+    semaphore_v(s1);
 }
 
 void f2(pid_t pid)
 {
-    if (!semaphore_p(s2)) exit(EXIT_FAILURE);
+    semaphore_p(s2);
     printf("Enter f2\n");
     sleep(1);
     if(!pid) f1(pid);
-    if(!semaphore_v(s2)) exit(EXIT_FAILURE);
+    semaphore_v(s2);
 }
